@@ -1,0 +1,1294 @@
+openapi: 3.0.1
+info:
+  title: Public transport ticket endpoint
+  description: This is an application which is simulate a public transport ticket handling.
+  contact:
+    email: karoly.froemel@gmail.com
+  version: 2.0.0
+servers:
+  - url: http://localhost:8081
+
+paths:
+  /token:
+    post:
+      tags:
+        - Token
+      operationId: getToken
+      summary: Get token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        200:
+          description: Get token
+          content:
+            application/json:
+              schema:
+                type: string
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /user:
+    get:
+      tags:
+        - User
+      operationId: getUserInfo
+      summary: Get user info
+      description: Get user info.
+      responses:
+        200:
+          description: Get user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /user/fillBalance:
+    put:
+      tags:
+        - User
+      summary: Fill account balance
+      operationId: fillUserAccountBalance
+      description: Fill user account balance.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FillBalance'
+      responses:
+        204:
+          description: Account balance changed.
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /user/getBalance:
+    get:
+      tags:
+        - User
+      summary: Get account balance
+      operationId: getUserAccountBalance
+      description: Get user account balance.
+      responses:
+        200:
+          description: Succesfully get account.
+          content:
+            application/json:
+              schema:
+                type: integer
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /user/searchInUserHistory:
+    post:
+      tags:
+        - User
+      operationId: searchInUserHistory
+      summary: Search in user history.
+      parameters:
+        - $ref: '#/components/parameters/X-Page'
+        - $ref: '#/components/parameters/X-Size'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserHistorySearch'
+      responses:
+        206:
+          description: 'Successful request'
+          headers:
+            X-Page:
+              $ref: '#/components/headers/X-Page'
+            X-Size:
+              $ref: '#/components/headers/X-Size'
+            X-Total-Pages:
+              $ref: '#/components/headers/X-Total-Pages'
+            X-Total-Size:
+              $ref: '#/components/headers/X-Total-Size'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserHistory'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticketType:
+    get:
+      tags:
+        - Ticket type
+      operationId: getTicketTypes
+      summary: Get all ticket types
+      description: Get all types of tickets to show it for the user.
+      responses:
+        200:
+          description: Get all types of tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketType'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    post:
+      tags:
+        - Ticket type
+      operationId: createNewTicketType
+      summary: Add a new ticket type.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketType"
+      responses:
+        201:
+          description: Ticket type succesfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketType'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    put:
+      tags:
+        - Ticket type
+      operationId: updateTicketType
+      summary: Update a ticket type.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketType'
+      responses:
+        204:
+          description: Successfully updated.
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticketType/{id}:
+    get:
+      tags:
+        - Ticket type
+      operationId: getTicketTypeById
+      summary: Get ticket type by id.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ticket type id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Succesfully get ticket by id.
+          content:
+            application/json:
+              schema:
+                $ref:  "#/components/schemas/TicketType"
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    delete:
+      tags:
+        - Ticket type
+      operationId: deleteTicketTypeById
+      summary: Delete ticket type by id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successfully deleted.
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticketType/search:
+    post:
+      tags:
+        - Ticket type
+      operationId: searchTicketType
+      summary: Search ticket type.
+      parameters:
+        - $ref: '#/components/parameters/X-Page'
+        - $ref: '#/components/parameters/X-Size'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketTypeSearchRequest'
+      responses:
+        206:
+          description: 'Successful request'
+          headers:
+            X-Page:
+              $ref: '#/components/headers/X-Page'
+            X-Size:
+              $ref: '#/components/headers/X-Size'
+            X-Total-Pages:
+              $ref: '#/components/headers/X-Total-Pages'
+            X-Total-Size:
+              $ref: '#/components/headers/X-Total-Size'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketType'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticketType/searchLambda:
+    post:
+      tags:
+        - Ticket type
+      operationId: searchTicketTypeLambda
+      summary: Search ticket type by lambda expression.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketTypeSearchRequest'
+      responses:
+        200:
+          description: 'Successful request'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketType'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /station:
+    post:
+      tags:
+        - Station
+      operationId: createNewStation
+      summary: Add a new station.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStation"
+      responses:
+        201:
+          description: Staion succesfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    put:
+      tags:
+        - Station
+      operationId: updateStation
+      summary: Update a station.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Station'
+      responses:
+        204:
+          description: Successfully updated.
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /station/search:
+    post:
+      tags:
+        - Station
+      operationId: searchStation
+      summary: Search station.
+      parameters:
+        - $ref: '#/components/parameters/X-Page'
+        - $ref: '#/components/parameters/X-Size'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationSearch'
+      responses:
+        206:
+          description: 'Successful request'
+          headers:
+            X-Page:
+              $ref: '#/components/headers/X-Page'
+            X-Size:
+              $ref: '#/components/headers/X-Size'
+            X-Total-Pages:
+              $ref: '#/components/headers/X-Total-Pages'
+            X-Total-Size:
+              $ref: '#/components/headers/X-Total-Size'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Station'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /station/{id}:
+    get:
+      tags:
+        - Station
+      operationId: getStationById
+      summary: Get station by id.
+      description: Get station by id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Succesfully get station.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    delete:
+      tags:
+        - Station
+      operationId: deleteStationById
+      summary: Delete station by id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Station successfully deleted.
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /service:
+    post:
+      tags:
+        - Service
+      operationId: createNewService
+      summary: Add a new service.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateService"
+      responses:
+        201:
+          description: Service succesfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    put:
+      tags:
+        - Service
+      operationId: updateService
+      summary: Update a service.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Service'
+      responses:
+        204:
+          description: Successfully updated.
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /service/search:
+    post:
+      tags:
+        - Service
+      operationId: searchService
+      summary: Search service.
+      parameters:
+        - $ref: '#/components/parameters/X-Page'
+        - $ref: '#/components/parameters/X-Size'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceSearch'
+      responses:
+        206:
+          description: 'Successful request'
+          headers:
+            X-Page:
+              $ref: '#/components/headers/X-Page'
+            X-Size:
+              $ref: '#/components/headers/X-Size'
+            X-Total-Pages:
+              $ref: '#/components/headers/X-Total-Pages'
+            X-Total-Size:
+              $ref: '#/components/headers/X-Total-Size'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Service'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /service/{id}:
+    get:
+      tags:
+        - Service
+      operationId: getServiceById
+      summary: Get service by id.
+      description: Get service by id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Succesfully get service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceWithStations'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    delete:
+      tags:
+        - Service
+      operationId: deleteServiceById
+      summary: Delete service by id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Service successfully deleted.
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /service/{serviceId}/station/{stationId}:
+    put:
+      tags:
+        - Service
+      operationId: addStationToService
+      summary: Add station to service.
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: stationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successfully updated.
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+    delete:
+      tags:
+        - Service
+      operationId: removeStationFromService
+      summary: Remove station from service.
+      parameters:
+        - in: path
+          name: serviceId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: stationId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Successfully updated.
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticket/search:
+    post:
+      tags:
+        - Ticket
+      operationId: searchTicket
+      summary: Search ticket.
+      parameters:
+        - $ref: '#/components/parameters/X-Page'
+        - $ref: '#/components/parameters/X-Size'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketSearch'
+      responses:
+        206:
+          description: 'Successful request'
+          headers:
+            X-Page:
+              $ref: '#/components/headers/X-Page'
+            X-Size:
+              $ref: '#/components/headers/X-Size'
+            X-Total-Pages:
+              $ref: '#/components/headers/X-Total-Pages'
+            X-Total-Size:
+              $ref: '#/components/headers/X-Total-Size'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticket/purchaseTicket:
+    post:
+      tags:
+        - Ticket
+      summary: Purchase ticket
+      operationId: purchaseTicket
+      description: Purchase ticket.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseTicket'
+      responses:
+        201:
+          description: Ticket purchased
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticket/validateTicket/{ticketId}:
+    put:
+      tags:
+        - Ticket
+      summary: Validate ticket
+      operationId: validateTicket
+      description: Validate one ticket.
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          description: ticket id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Ticket validation was successful
+        400:
+          $ref: '#/components/responses/400BadRequest'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticket/refund/{ticketId}:
+    delete:
+      tags:
+        - Ticket
+      summary: Refund ticket
+      operationId: refundTicket
+      description: refund one ticket or pass.
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          description: ticket id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: Ticket refund was successful
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+  /ticket/{ticketId}:
+    get:
+      tags:
+        - Ticket
+      summary: get ticket
+      operationId: getTicket
+      description: get one ticket or pass.
+      parameters:
+        - name: ticketId
+          in: path
+          required: true
+          description: ticket id
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Ticket refund was successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        401:
+          $ref: '#/components/responses/401Unauthorized'
+        403:
+          $ref: '#/components/responses/403PermissionDenied'
+        404:
+          $ref: '#/components/responses/404ContentNotFound'
+        500:
+          $ref: '#/components/responses/500ServerError'
+
+components:
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+        - username
+        - password
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        account:
+          $ref: '#/components/schemas/Account'
+
+    FillBalance:
+      type: object
+      properties:
+        addBalance:
+          type: integer
+          minimum: 1
+          maximum: 5000
+      required:
+        - userId
+        - addBalance
+
+    TicketType:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 250
+        price:
+          type: integer
+          minimum: 1
+        expirationTime:
+          type: integer
+          minimum: 1
+        imgSource:
+          type: string
+        isEnforceable:
+          type: boolean
+      required:
+        - name
+        - description
+        - price
+        - expirationTime
+        - isEnforceable
+
+    TicketTypeSearchRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          nullable: false
+          description: 'Name of ticket type'
+        isEnforceable:
+          type: boolean
+        description:
+          type: string
+          maxLength: 250
+          description: 'Description of ticket type'
+        sortBy:
+          type: string
+          nullable: false
+          default: 'name'
+          description: 'Sort by this column'
+        sortOrder:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          default: 'ASC'
+          description: 'Sort Order'
+
+    Station:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        qrCode:
+          type: string
+      required:
+        - id
+        - name
+
+    CreateStation:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+
+    StationSearch:
+      type: object
+      properties:
+        name:
+          type: string
+        sortBy:
+          type: string
+          nullable: false
+          description: 'Sort by this column'
+          default: 'name'
+        sortOrder:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          description: 'Sort order'
+          default: 'ASC'
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - BUS
+            - TRAM
+            - SUBWAY
+            - BOAT
+      required:
+        - id
+        - name
+        - type
+
+    ServiceWithStations:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - BUS
+            - TRAM
+            - SUBWAY
+            - BOAT
+        stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Station'
+      required:
+        - id
+        - name
+        - type
+        - stations
+
+    CreateService:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - BUS
+            - TRAM
+            - SUBWAY
+            - BOAT
+      required:
+        - name
+        - type
+
+    ServiceSearch:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - BUS
+            - TRAM
+            - SUBWAY
+            - BOAT
+        sortBy:
+          type: string
+          nullable: false
+          description: 'Sort by this column'
+          default: 'name'
+        sortOrder:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          description: 'Sort order'
+          default: 'ASC'
+
+    TicketSearch:
+      type: object
+      properties:
+        ticketType:
+          type: string
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - REFUNDED
+            - CAN_BE_USED
+            - EXPIRED
+        sortBy:
+          type: string
+          nullable: false
+          description: 'Sort by this column'
+          default: 'ticketType'
+        sortOrder:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          description: 'Sort order'
+          default: 'ASC'
+
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        purchaseDate:
+          type: string
+        validFrom:
+          type: string
+        validTo:
+          type: string
+        validationTime:
+          type: string
+        status:
+          type: string
+          enum:
+            - VALIDATED
+            - REFUNDED
+            - CAN_BE_USED
+            - EXPIRED
+        imgSource:
+          type: string
+        isEnforceable:
+          type: boolean
+      required:
+        - id
+        - name
+        - purchaseDate
+        - validFrom
+        - validTo
+        - status
+        - imgSource
+        - isEnforceable
+
+    PurchaseTicket:
+      type: object
+      properties:
+        ticketId:
+          type: string
+          format: uuid
+        validFrom:
+          type: string
+          format: date
+      required:
+        - ticketName
+        - validFrom
+
+    Account:
+      type: object
+      properties:
+        balance:
+          type: integer
+      required:
+        - balance
+
+    Error:
+      title: "Error object"
+      type: object
+      properties:
+        errorCode:
+          type: string
+          nullable: false
+          description: "Error code"
+        message:
+          type: string
+          nullable: false
+          description: "Error message"
+        detailedMessage:
+          type: string
+          nullable: false
+          description: "Detailed error message"
+      required:
+        - "errorCode"
+
+    UserHistorySearch:
+      type: object
+      properties:
+        historyType:
+          type: string
+          enum:
+            - PURCHASE
+            - REFUND
+            - FILL_BALANCE
+            - VALIDATE
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        sortBy:
+          type: string
+          nullable: false
+          description: 'Sort by this column'
+          default: 'historyType'
+        sortOrder:
+          type: string
+          enum:
+            - ASC
+            - DESC
+          description: 'Sort order'
+          default: 'ASC'
+
+    UserHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        historyType:
+          type: string
+          enum:
+            - PURCHASE
+            - REFUND
+            - FILL_BALANCE
+            - VALIDATE
+        ticketId:
+          type: string
+          format: uuid
+        balanceBefore:
+          type: integer
+        balanceAfter:
+          type: integer
+        createdOn:
+          type: string
+
+  parameters:
+    X-Page:
+      name: X-Page
+      in: header
+      description: "Requested page number"
+      required: true
+      schema:
+        type: integer
+    X-Size:
+      name: X-Size
+      in: header
+      description: "Requested page size"
+      required: true
+      schema:
+        type: integer
+
+  headers:
+    X-Page:
+      required: true
+      schema:
+        type: integer
+      description: "Number of requested pages"
+
+    X-Size:
+      required: true
+      schema:
+        type: integer
+      description: "Max page size"
+
+    X-Total-Pages:
+      required: true
+      schema:
+        type: integer
+      description: "Number of all requestable pages"
+    X-Total-Size:
+      required: true
+      schema:
+        type: integer
+      description: "Number of all requestable element"
+
+  responses:
+    400BadRequest:
+      description: "Bad request."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    401Unauthorized:
+      description: "Authentication is required"
+
+    403PermissionDenied:
+      description: "User do not have permission to perform the action."
+
+    404ContentNotFound:
+      description: "Content not found."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    500ServerError:
+      description: "Server side error."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

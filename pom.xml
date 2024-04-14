@@ -11,6 +11,7 @@
 
     <modules>
         <module>PublicTransportAppRest</module>
+        <module>PublicTransportRestContract</module>
     </modules>
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
